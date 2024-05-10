@@ -60,25 +60,58 @@ library ieee;
 entity top_basys3 is
 	port(
 		-- Switches
-		sw		:	in  std_logic_vector(2 downto 0);
+		sw		:	in  std_logic_vector(2 downto 0):= (others=> '0');
 		
 		-- LEDs
-		led	    :	out	std_logic_vector(1 downto 0)
+		led	    :	out	std_logic_vector(1 downto 0):= (others=> '0')
 	);
 end top_basys3;
 
 architecture top_basys3_arch of top_basys3 is 
 	
   -- declare the component of your top-level design 
+    component halfAdder is
+      port (
+          i_A : in std_logic;
+          i_B : in std_logic;
+          o_S : out std_logic;
+          o_C : out std_logic
+          );
+      end component halfAdder;
+  -- declare any signals you will need
+  signal w_sw2 : std_logic := '0'; -- Carry in	
+  signal w_sw1 : std_logic := '0'; -- B
+  signal w_sw0 : std_logic := '0'; -- A
+  signal w_led1 : std_logic := '0'; -- Carry out
+  signal w_led0 : std_logic := '0'; -- Sum
+  signal w_S1 : std_logic := '0'; -- Sum1 out
+  signal w_C1 : std_logic := '0'; -- Carry out 1
+  signal w_C2 : std_logic := '0'; -- Carry out 2
 
-  -- declare any signals you will need	
-  
+
+
 begin
 	-- PORT MAPS --------------------
-   
+   halfAdder1_inst : halfAdder port map(
+        i_A  => w_sw0, -- notice comma (not a semicolon)
+        i_B  => w_sw1,
+        o_S  => w_S1,
+        o_C  => w_C1
+        );
+    halfAdder2_inst : halfAdder port map(
+        i_A  => w_S1,
+        i_B  => w_sw2,
+        o_S  => w_led0,
+        o_C  => w_C2
+         -- TODO:  map Cout 
+        );
 	---------------------------------
-	
 	-- CONCURRENT STATEMENTS --------
-	 led(1) <= -- TODO
+	w_led1 <= (w_C1 or w_C2);
+	led(1) <= w_led1;
+	led(0) <= w_led0;
+	w_sw2 <= sw(2);
+	w_sw1 <= sw(1);
+	w_sw0 <= sw(0);
 	---------------------------------
 end top_basys3_arch;
